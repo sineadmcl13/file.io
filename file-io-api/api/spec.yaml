@@ -1,0 +1,266 @@
+---
+openapi: 3.0.0
+info:
+  title: file.io API
+  description: file.io API
+  version: 1.0.0
+servers:
+  - url: https://file.io
+    description: Main production server
+paths:
+  "/":
+    post:
+      summary: Uploads file and creates file details
+      description: Creates a file
+      operationId: upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                expires:
+                  "$ref": "#/components/schemas/TimePeriod"
+                maxDownloads:
+                  type: integer
+                autoDelete:
+                  type: boolean
+      responses:
+        '200':
+          description: A FileDetails object
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FileDetailsResponse"
+    get:
+      summary: Gets list of files
+      description: Gets list of files
+      operationId: list_files
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: An array of FileDetails objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  files:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/FileDetails"
+  "/{key}":
+    get:
+      summary: Downloads the file identified by {key}
+      description: Downloads the file identified by {key}
+      operationId: get_file_by_id
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File data
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        '302':
+          description: Redirect to https://www.file.io/download/{key}
+    put:
+      summary: Updates the file identified by {key}. Any parameters not provided are
+        reset to defaults.
+      description: Updates the file identified by {key}. Any parameters not provided
+        are reset to defaults.
+      operationId: put_file_by_key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                expires:
+                  "$ref": "#/components/schemas/TimePeriod"
+                maxDownloads:
+                  type: integer
+                autoDelete:
+                  type: boolean
+      responses:
+        '200':
+          description: A FileDetails object
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FileDetailsResponse"
+    patch:
+      summary: Updates the file identified by {key}. For any parameters not provided
+        in request, existing values are retained.
+      description: Updates the file identified by {key}. For any parameters not provided
+        in request, existing values are retained.
+      operationId: patch_file_by_key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                expires:
+                  "$ref": "#/components/schemas/TimePeriod"
+                maxDownloads:
+                  type: integer
+                autoDelete:
+                  type: boolean
+      responses:
+        '200':
+          description: A FileDetails object
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/FileDetailsResponse"
+    delete:
+      summary: Deletes the file identified by {key}
+      description: Deletes the file identified by <key>
+      operationId: delete_file_by_key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Response"
+  "/me":
+    get:
+      description: Gets plan/account details for authenticated user
+      summary: Gets plan/account details for authenticated user
+      operationId: get_user_info
+      responses:
+        '200':
+          description: Plan/account details
+          content:
+            application/json:
+              schema:
+                 "$ref": "#/components/schemas/PlanInfo"
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BasicAuth:
+      description: To authenticate using HTTP Basic, enter your API key in the username
+        field. Password is not required.
+      type: http
+      scheme: basic
+    BearerAuth:
+      description: Enter your API key in the field below.
+      type: http
+      scheme: bearer
+  schemas:
+    Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: integer
+    PlanInfo:
+      type: object
+      properties:
+        planId:
+          type: integer
+        maxUploadBytes:
+          type: integer
+        maxStorageBytes:
+          type: integer
+        usedStorageBytes:
+          type: integer
+        rateLimit:
+          type: integer
+    TimePeriod:
+      type: string
+      pattern: "^[1-9]\\d*[y|Q|M|w|d|h|m|s]$"
+    FileDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        name:
+          type: string
+        link:
+          type: string
+          format: url
+        expires:
+          type: string
+          format: date-time
+        expiry:
+          type: string
+        downloads:
+          type: integer
+        maxDownloads:
+          type: integer
+        autoDelete:
+          type: boolean
+        size:
+          type: integer
+        mimeType:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+    FileDetailsResponse:
+      allOf:
+        - "$ref": "#/components/schemas/Response"
+        - "$ref": "#/components/schemas/FileDetails"

@@ -1,0 +1,4 @@
+rootProject.name = 'file.io'
+include 'file-io-service'
+include 'file-io-api'
+

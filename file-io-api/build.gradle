@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id "org.openapi.generator" version "5.1.1"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.7'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+    implementation 'io.swagger:swagger-annotations:1.6.2'
+    implementation 'io.gsonfire:gson-fire:1.8.5'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+}
+
+
+sourceSets.main.java.srcDir "${buildDir}/generated/src/main/java"
+
+compileJava.dependsOn tasks.openApiGenerate
+openApiGenerate {
+    generatorName = "java"
+    inputSpec = "$projectDir/api/spec.yaml".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "org.fileio.api"
+    invokerPackage = "org.fileio.invoker"
+    modelPackage = "org.fileio.model"
+    configOptions = [
+            dateLibrary: "java8"
+    ]
+}
