@@ -3,9 +3,6 @@
 [File.io](https://file.io) java client and usage examples
 
 ### Building From Source
-
-before this, make sure [Go](https://golang.org/dl/) already installed on your machine
-
 ```sh
 $ git clone https://github.com/sineadmcl13/file.io.git && cd file.io
 $ ./gradlew build
